@@ -9,7 +9,7 @@ import IPost from "../interfaces/Post";
 import { positionCreator } from "../utils/geoUtils";
 import {
   POSITION_COLLECTION_NAME,
-  POST_COLLECTION_NAME
+  POST_COLLECTION_NAME,
 } from "../config/collectionNames";
 
 let positionCollection: mongo.Collection;
@@ -50,6 +50,32 @@ export default class GameFacade {
     }
   }
 
+  static async updatePosition(
+    userName: string,
+    longitude: number,
+    latitude: number
+  ) {
+    try {
+      // update (or create if this is the first time) his position
+      const point = { type: "Point", coordinates: [longitude, latitude] };
+      const date = new Date();
+      const found = await positionCollection.findOneAndUpdate(
+        { userName },
+        {
+          $set: {
+            userName,
+            lastUpdated: date,
+            location: point,
+          },
+        },
+        { upsert: true, returnOriginal: false }
+      );
+      return await found.value;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async nearbyPlayers(
     userName: string,
     password: string,
@@ -78,8 +104,8 @@ export default class GameFacade {
             userName,
             name: user.name,
             lastUpdated: date,
-            location: point
-          }
+            location: point,
+          },
         },
         { upsert: true, returnOriginal: false }
       );
@@ -94,11 +120,11 @@ export default class GameFacade {
       );
 
       //If anyone found, format acording to requirements
-      const formatted = nearbyPlayers.map(player => {
+      const formatted = nearbyPlayers.map((player) => {
         return {
           userName: player.userName,
           lat: latitude,
-          lon: longitude
+          lon: longitude,
         };
       });
       return formatted;
@@ -118,9 +144,9 @@ export default class GameFacade {
         location: {
           $near: {
             $geometry: point,
-            $maxDistance: distance
-          }
-        }
+            $maxDistance: distance,
+          },
+        },
       });
       return found.toArray();
     } catch (err) {
@@ -140,11 +166,11 @@ export default class GameFacade {
           $near: {
             $geometry: {
               type: "Point",
-              coordinates: [lon, lat]
+              coordinates: [lon, lat],
             },
-            $maxDistance: this.DIST_TO_CENTER
-          }
-        }
+            $maxDistance: this.DIST_TO_CENTER,
+          },
+        },
       });
       if (post === null) {
         throw new ApiError("Post not reached", 400);
@@ -171,8 +197,8 @@ export default class GameFacade {
       taskSolution,
       location: {
         type: "Point",
-        coordinates: [lon, lat]
-      }
+        coordinates: [lon, lat],
+      },
     });
     const newPost: any = status.ops;
     return newPost as IPost;
