@@ -121,10 +121,11 @@ export default class GameFacade {
 
       //If anyone found, format acording to requirements
       const formatted = nearbyPlayers.map((player) => {
+        const coordinates = player.location.coordinates;
         return {
           userName: player.userName,
-          lat: latitude,
-          lon: longitude,
+          lat: coordinates[1],
+          lon: coordinates[0],
         };
       });
       return formatted;
