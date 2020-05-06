@@ -45,7 +45,7 @@ export default class UserFacade {
   static async getAllUsers(): Promise<Array<any>> {
     const all = await userCollection.find(
       {},
-      { projection: { name: 1, userName: 1, _id: 0 } }
+      { projection: { name: 1, userName: 1, role: 1, _id: 0 } }
     );
     return all.toArray();
   }
@@ -82,13 +82,13 @@ async function test() {
     name: "kim",
     userName: "kim@b.dk",
     password: "secret",
-    role: "user"
+    role: "user",
   });
   await UserFacade.addUser({
     name: "ole",
     userName: "ole@b.dk",
     password: "secret",
-    role: "user"
+    role: "user",
   });
 
   const all = await UserFacade.getAllUsers();
